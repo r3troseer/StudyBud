@@ -15,10 +15,8 @@ class FileView(generics.GenericAPIView):
         if serializer.is_valid():
             file = serializer.validated_data["document"]
             document = Document.objects.create(document=file)
-            print(f'{document} created')
-            document.document_to_text()
-            print("got here")
-            message = {'detail': ('File analyzed.')}
+            document.process()
+            message = {"detail": ("File analyzed.")}
             return Response(message, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
