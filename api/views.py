@@ -15,7 +15,7 @@ class FileView(generics.GenericAPIView):
         if serializer.is_valid():
             file = serializer.validated_data["document"]
             document = Document.objects.create(document=file)
-            document.process()
+            document.process_file()
             message = {"detail": ("File analyzed.")}
             return Response(message, status=status.HTTP_201_CREATED)
         else:

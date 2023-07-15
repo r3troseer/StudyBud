@@ -1,38 +1,66 @@
 import docx2txt
 import fitz
-import magic
+import os
 from django.core.exceptions import ValidationError
 from django.db import models
 
+try:
+    import magic
+    HAS_MAGIC = True
+except ImportError:
+    HAS_MAGIC = False
+print(HAS_MAGIC)
 
-class Document(models.Model):
-    text = models.TextField()
-    document = models.FileField(upload_to="documents/")
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+ALLOWED_MIME_TYPES = [
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+]
+ALLOWED_EXTENSIONS = [".pdf", ".docx"]
 
-    def clean(self):
-        super().clean()
-        self.validate_file_type()
 
-    def validate_file_type(self):
-        file_type = magic.from_buffer(self.read(), mime=True)
-        if file_type not in [
-            "application/pdf",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        ]:
+def validate_file_type(value):
+    """
+    Custom file type validation based on presence of 'magic' module or file extension
+    """
+    if HAS_MAGIC:
+        print("magic")
+        file_type = magic.from_buffer(value.read(), mime=True)
+        if file_type not in ALLOWED_MIME_TYPES:
+            raise ValidationError(
+                "Invalid file type. Only PDF and DOCX files are allowed."
+            )
+    else:
+        print("no magic")
+        ext = os.path.splitext(value.name)[1]
+        if ext.lower() not in ALLOWED_EXTENSIONS:
             raise ValidationError(
                 "Invalid file type. Only PDF and DOCX files are allowed."
             )
 
-    def process(self):
-        self.clean()  # Perform file type validation before saving
-        if magic.from_buffer(self.read(), mime=True) == "application/pdf":
-            self.process_pdf()
-        elif (
-            magic.from_buffer(self.read(), mime=True)
-            == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        ):
-            self.process_word()
+
+class Document(models.Model):
+    text = models.TextField()
+    document = models.FileField(upload_to="documents/", validators=[validate_file_type])
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def process_file(self):
+        """
+        Process the uploaded file based on its file type
+        """
+        if HAS_MAGIC:
+            if magic.from_buffer(self.read(), mime=True) == "application/pdf":
+                self.process_pdf()
+            elif (
+                magic.from_buffer(self.read(), mime=True)
+                == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            ):
+                self.process_word()
+        else:
+            ext = os.path.splitext(self.document.name)[1]
+            if ext.lower() == ".pdf":
+                self.process_pdf()
+            elif ext.lower() == ".docx":
+                self.process_word()
 
     def process_pdf(self):
         """
@@ -56,7 +84,7 @@ class Document(models.Model):
 
     def read(self):
         """
-        method to return the content of the file
+        Returns the content of the file
         """
         reading = self.document.read()
         self.document.seek(0)  # Resets file pointer
