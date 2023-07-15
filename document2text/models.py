@@ -89,6 +89,13 @@ class Document(models.Model):
         reading = self.document.read()
         self.document.seek(0)  # Resets file pointer
         return reading
+    
+    def name(self):
+        """
+        Returns only the filename without the 'document/' prefix.
+        """
+        return os.path.basename(self.document.name)
+
 
     def __str__(self):
-        return self.document.name
+        return self.name()

@@ -4,7 +4,6 @@ from .models import *
 from document2text.models import Document
 
 class FileSerializer(ModelSerializer):
-    document = serializers.FileField()
     class Meta:
         model = Document
         fields=['document']
