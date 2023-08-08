@@ -25,6 +25,7 @@ def validate_file_type(value):
     if HAS_MAGIC:
         print("magic")
         file_type = magic.from_buffer(value.read(), mime=True)
+        print(file_type)
         if file_type not in ALLOWED_MIME_TYPES:
             raise ValidationError(
                 "Invalid file type. Only PDF and DOCX files are allowed."
