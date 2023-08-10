@@ -91,11 +91,12 @@ DATABASES = {
     }
 }
 
+database_url = config("DATABASE_URL", default=None)
 
 
-if DEV_ENVIRONMENT == 'LOCAL' or 'RENDER':
+if database_url:
     # database_url = config("DATABASE_URL")
-    # DATABASES["default"] = dj_database_url.parse(database_url)
+    DATABASES["default"] = dj_database_url.parse(database_url)
     pass
 
 # Password validation
