@@ -85,20 +85,17 @@ WSGI_APPLICATION = "StudyMate.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USERNAME'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOSTNAME'),
-        'PORT': config('DB_PORT', cast=int),
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
 
 
 if DEV_ENVIRONMENT == 'LOCAL' or 'RENDER':
-    database_url = config("DATABASE_URL")
-    DATABASES["default"] = dj_database_url.parse(database_url)
+    # database_url = config("DATABASE_URL")
+    # DATABASES["default"] = dj_database_url.parse(database_url)
+    pass
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
