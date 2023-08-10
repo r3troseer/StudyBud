@@ -62,11 +62,11 @@ def break_large_text(text, max_token_limit):
 
 
 def generate_summary(text):
-    summ = [{"role": "system", "content": "You are an extractive text summarizer."}]
+    summ = [{"role": "system", "content": "You are an extractive document summarizer."}]
     summ.append(
         {
             "role": "user",
-            "content": f"Provide a concise summary of the following text:\n\n-----\n\n{text}\n\n note: Your summary should capture the main points and key ideas of the text.",
+            "content": f"Provide a concise summary of the following text:\n\n-----\n\n{text}\n\n note: Your summary should capture the main points and key ideas of the document.",
         }
     )
     response = openai.ChatCompletion.create(
@@ -98,24 +98,31 @@ def generate_summary_vinci(self):
 
 
 def generate_question(text):
-    prompt = (
-        f"generate 10 multi-choice questions on this with 4 option including an answer and 3 distractors in the format:\n\n 'question:\n options:\na\nb\nc\nd \nanswer:' \n\nbased on the following text:\n\n-----\n\n{text} \n\n note: do not perfom text completion"
-    )
+    prompt = f"generate '10' multi-choice questions on this with 4 option including an answer and 3 distractors based on the following text:\n\n-----\n\n{text} \n\n note: do not perfom text completion, ignore references and the 10 questions should be in the format:\n\n 'question:\n options:\na\nb\nc\nd \nanswer:' "
     response = openai.Completion.create(
         model="text-davinci-003",
         prompt=prompt,
         temperature=0.1,
+        max_tokens=1500,
     )
+    print(response)
     question = response.choices[0].text
-    return question
+    pjson = json.loads(str(response))
+    pdata = pjson["choices"][0]["text"]
+    return str(pdata)
+
 
 def quest_parser(response):
     questions = []
-    response_parts = response.strip().split("\n\n")  # Split response into individual questions
+    response_parts = response.strip().split(
+        "\n\n"
+    )  # Split response into individual questions
 
     for qa in response_parts:
         lines = qa.split("\n")
+        print(f"all:\n {lines}")
 
+        print(f"first:\n {lines[0]}")
         try:
             question = lines[0].split(": ")[1]
         except IndexError:
@@ -131,6 +138,8 @@ def quest_parser(response):
         answer = lines[-1].split(": ")[1]
 
         answer = qa.split("\n")[-1].split(": ")[1]
-        questions.append((question, choices, answer))  # Append the parsed question to the list
+        questions.append(
+            (question, choices, answer)
+        )  # Append the parsed question to the list
 
     return questions
