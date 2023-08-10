@@ -51,10 +51,10 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-if DEV_ENVIRONMENT == 'RENDER':
+if DEV_ENVIRONMENT == 'RENDER' or 'OCEAN':
     MIDDLEWARE.insert(2, "whitenoise.middleware.WhiteNoiseMiddleware")
 
-if DEV_ENVIRONMENT== 'RENDER':
+if DEV_ENVIRONMENT== 'RENDER' or 'OCEAN':
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -136,7 +136,9 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-STATIC_ROOT = config("STATIC_ROOT")
+
+STATIC_ROOT = Path(BASE_DIR).joinpath("staticfiles")
+STATICFILES_DIRS = (Path(BASE_DIR).joinpath("static"),)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
