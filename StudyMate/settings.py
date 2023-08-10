@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "api.apps.ApiConfig",
     "document2text.apps.Document2TextConfig",
+    "corsheaders",
     "rest_framework",
 ]
 
