@@ -6,7 +6,7 @@ from django.db import models
 
 try:
     import magic
-    # HAS_MAGIC = True
+    HAS_MAGIC = True
 except ImportError:
     HAS_MAGIC = False
 # print(HAS_MAGIC)
