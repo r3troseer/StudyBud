@@ -23,13 +23,13 @@ class Question(models.Model):
     def generate(cls, document_id):
         document = Document.objects.get(id=document_id)
         chunks = break_large_text(document.text, quest_max_token_limit)
-        number_of_chunks=len(chunks)
+        number_of_chunks = len(chunks)
         # with transaction.atomic():
         for i, chunk in enumerate(chunks):
             # print(f"chunk {i}: {chunk.strip()}")
             quest = generate_question(chunk)
             # print(f"question {i}: {quest}")
-            questions=quest_parser(quest)
+            questions = quest_parser(quest)
             print(questions)
             question_objs = []
             for question, choices, answer in questions:
@@ -40,20 +40,13 @@ class Question(models.Model):
                     answer=answer,
                 )
                 question_objs.append(question_obj)
-            
+
             cls.objects.bulk_create(question_objs)
             if number_of_chunks > 2:
                 sleep(10)
 
-
     def __str__(self):
         return f"Question {self.id} for Document {str(self.document)}"
-
-
-# class Option(models.Model):
-#     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-#     option = models.CharField(max_length=500)
-#     isAnswer = models.BooleanField(default=False)
 
 
 class Summary(models.Model):

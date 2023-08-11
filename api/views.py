@@ -1,5 +1,4 @@
-from django.shortcuts import render
-from rest_framework import generics, status, viewsets, mixins, views
+from rest_framework import generics, status, views
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -82,13 +81,3 @@ class QuestionListView(generics.ListAPIView):
     def get_queryset(self):
         document_id = self.request.query_params.get("document_id")
         return Question.objects.filter(document_id=document_id)
-
-
-# class QuizView(generics):
-#     pass
-
-# class SummaryView(generics):
-#     pass
-
-# class FeedbackView(generics):
-#     pass

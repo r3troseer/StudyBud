@@ -6,28 +6,7 @@ import openai
 openai.api_key = config("OPENAI_API_KEY")
 
 
-# def break_large_text(text, max_token_limit, overlap):
-#     paragraphs = text.split("\n\n")  # Split text into paragraphs
-#     chunks = []
-
-#     for paragraph in paragraphs:
-#         tokens = nltk.word_tokenize(paragraph)
-#         if len(tokens) > max_token_limit:
-#             # Split paragraph into smaller chunks based on max_token_limit
-#             start = 0
-#             while start < len(tokens):
-#                 end = min(start + max_token_limit, len(tokens))
-#                 chunk = " ".join(tokens[start:end])
-#                 chunks.append(chunk)
-#                 start += max_token_limit - overlap
-#         else:
-#             chunks.append(paragraph + "\n")
-#     return chunks
-
-
 def break_large_text(text, max_token_limit):
-    # Split text into paragraphs
-    # paragraphs = text.split("\n\n")
     chunks = []
 
     # Tokenize the text into sentences
@@ -74,26 +53,10 @@ def generate_summary(text):
         messages=summ,
         temperature=0.5,
     )
-    # print(response)
-    # p = str(p)  # coverts OpenAIObject into string to prepare for json to dictionary conversion
-    # pjson = json.loads(response)  # converts json to dict
-    # # Extract the generated questions and options from the response
-    # pdata = pjson["choices"][0]["message"]["content"]
 
     # Extract the generated summary from the API response
     summary = response.choices[0].message.content
     print(response.usage)
-    return summary
-
-
-def generate_summary_vinci(self):
-    prompt = f""
-    response = openai.Completion.create(
-        model="",
-        messages=prompt,
-        temperature=0.9,
-    )
-    summary = response.choices[0].text
     return summary
 
 

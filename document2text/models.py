@@ -2,6 +2,7 @@ import docx2txt
 import fitz
 import os
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
 from django.db import models
 
 try:
@@ -40,6 +41,7 @@ def validate_file_type(value):
 
 
 class Document(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     text = models.TextField()
     document = models.FileField(upload_to="documents/", validators=[validate_file_type])
     uploaded_at = models.DateTimeField(auto_now_add=True)
