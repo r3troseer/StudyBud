@@ -52,10 +52,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-if DEV_ENVIRONMENT == 'RENDER' or 'OCEAN':
-    MIDDLEWARE.insert(2, "whitenoise.middleware.WhiteNoiseMiddleware")
-
-if DEV_ENVIRONMENT== 'RENDER' or 'OCEAN':
+if DEV_ENVIRONMENT != "LOCAL":
+    MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -97,7 +95,6 @@ database_url = config("DATABASE_URL", default=None)
 if database_url:
     # database_url = config("DATABASE_URL")
     DATABASES["default"] = dj_database_url.parse(database_url)
-    pass
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -146,5 +143,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # Celery settings
-CELERY_BROKER_URL = config('CELERY_BROKER_URL')
-CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND')
+CELERY_BROKER_URL = config("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND")

@@ -1,9 +1,11 @@
 from decouple import config
+import nltk
 from nltk import word_tokenize, sent_tokenize
 import json
 import openai
 
 openai.api_key = config("OPENAI_API_KEY")
+nltk.download("punkt")
 
 
 def break_large_text(text, max_token_limit):

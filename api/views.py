@@ -65,7 +65,25 @@ class SummaryView(generics.GenericAPIView):
         return Response(serializer.data)
 
 
-class GenerateQuestionsView(views.APIView):
+class GenerateQuestionsView(generics.GenericAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = QuestionSerializer
+
+    def get(self, request, pk):
+        try:
+            document = Document.objects.get(pk=pk)
+        except Document.DoesNotExist:
+            return Response(
+                {"error": "Document not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        questions = Question.generate(document.id) 
+
+        serializer = self.get_serializer(questions, many=True)
+        return Response(serializer.data)
+    
+
+class GenerateQuestionsDelayView(views.APIView):
     def post(self, request, *args, **kwargs):
         document_id = request.data.get("document_id")
         generate_and_append_chunks.delay(document_id)

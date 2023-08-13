@@ -11,9 +11,25 @@ class FileSerializer(ModelSerializer):
 
 
 class QuestionSerializer(ModelSerializer):
+    correct_answer = serializers.SerializerMethodField()
+
     class Meta:
         model = Question
-        fields = '__all__'
+        # fields = "__all__"
+        exclude = ['answer']
+
+    def get_correct_answer(self, obj):
+        options = obj.options
+        answer = obj.answer
+        try:
+            correct_index = options.index(answer)
+        except ValueError:
+            # Extract the first part (letter)
+            answer_letter = answer.split('.')[0].strip()
+            option_letters = [option.split('.')[0].strip() for option in options]
+            correct_index = option_letters.index(answer_letter)
+            
+        return correct_index
 
 
 class SummarySerializer(ModelSerializer):
