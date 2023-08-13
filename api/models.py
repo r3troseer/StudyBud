@@ -27,6 +27,7 @@ class Question(models.Model):
         # with transaction.atomic():
         for i, chunk in enumerate(chunks):
             # print(f"chunk {i}: {chunk.strip()}")
+            quiz=[]
             quest = generate_question(chunk)
             # print(f"question {i}: {quest}")
             questions = quest_parser(quest)
@@ -41,9 +42,10 @@ class Question(models.Model):
                 )
                 question_objs.append(question_obj)
 
-            cls.objects.bulk_create(question_objs)
+            quiz= cls.objects.bulk_create(question_objs)
             if number_of_chunks > 2:
                 sleep(10)
+        return quiz
 
     def __str__(self):
         return f"Question {self.id} for Document {str(self.document)}"
