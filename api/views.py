@@ -1,5 +1,4 @@
 from rest_framework import generics, status, views
-from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from document2text.models import Document
@@ -45,6 +44,14 @@ class FileView(generics.GenericAPIView):
 
 
 class SummaryView(generics.GenericAPIView):
+    """
+    API endpoint to generate a summary.
+
+    - Retrieves the Document object based on the provided primary key.
+    - Generates a summary for the document's text.
+    - Returns the summary in the response.
+    """
+
     queryset = Summary.objects.all()
     permission_classes = [AllowAny]
     serializer_class = SummarySerializer
@@ -57,15 +64,21 @@ class SummaryView(generics.GenericAPIView):
             return Response(
                 {"error": "Document not found."}, status=status.HTTP_404_NOT_FOUND
             )
-
         summary = Summary.objects.create(document=document)
         summary.generate()
-
         serializer = self.get_serializer(summary)
         return Response(serializer.data)
 
 
 class GenerateQuestionsView(generics.GenericAPIView):
+    """
+    API endpoint to generate questions.
+
+    - Retrieves the Document object based on the provided primary key.
+    - Generates aquestions for the document's text.
+    - Returns the questions in the response.
+    """
+
     permission_classes = [AllowAny]
     serializer_class = QuestionSerializer
 
@@ -76,14 +89,19 @@ class GenerateQuestionsView(generics.GenericAPIView):
             return Response(
                 {"error": "Document not found."}, status=status.HTTP_404_NOT_FOUND
             )
-
-        questions = Question.generate(document.id) 
-
+        questions = Question.generate(document.id)
         serializer = self.get_serializer(questions, many=True)
         return Response(serializer.data)
-    
+
 
 class GenerateQuestionsDelayView(views.APIView):
+    """
+    API endpoint to generate questions.
+
+    - Initiates a task to generate questions for a specified document.
+    - Returns a message indicating the task has started.
+    """
+
     def post(self, request, *args, **kwargs):
         document_id = request.data.get("document_id")
         generate_and_append_chunks.delay(document_id)
@@ -93,6 +111,12 @@ class GenerateQuestionsDelayView(views.APIView):
 
 
 class QuestionListView(generics.ListAPIView):
+    """
+    API endpoint to retrieve questions.
+
+    - Retrieves and returns a list of questions for a specific document.
+    """
+
     serializer_class = QuestionSerializer
     pagination_class = QuestionPagination
 

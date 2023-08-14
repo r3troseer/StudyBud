@@ -10,8 +10,8 @@ try:
     HAS_MAGIC = True
 except ImportError:
     HAS_MAGIC = False
-# print(HAS_MAGIC)
 
+# Allowed MIME types and extensions for file validation
 ALLOWED_MIME_TYPES = [
     "application/pdf",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -24,7 +24,7 @@ def validate_file_type(value):
     Custom file type validation based on presence of 'magic' module or file extension
     """
     if HAS_MAGIC:
-        print("magic")
+        # Validate using magic module
         file_type = magic.from_buffer(value.read(), mime=True)
         print(file_type)
         if file_type not in ALLOWED_MIME_TYPES:
@@ -32,7 +32,7 @@ def validate_file_type(value):
                 "Invalid file type. Only PDF and DOCX files are allowed."
             )
     else:
-        print("no magic")
+        # Validate using file extension
         ext = os.path.splitext(value.name)[1]
         if ext.lower() not in ALLOWED_EXTENSIONS:
             raise ValidationError(
@@ -41,6 +41,8 @@ def validate_file_type(value):
 
 
 class Document(models.Model):
+    """Model to store uploaded documents and their extracted text"""
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     text = models.TextField()
     document = models.FileField(upload_to="documents/", validators=[validate_file_type])

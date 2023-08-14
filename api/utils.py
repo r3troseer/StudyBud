@@ -9,13 +9,16 @@ nltk.download("punkt")
 
 
 def break_large_text(text, max_token_limit):
+    """
+    Break a large text into chunks based on token limits
+    """
+    # Initialize variables
     chunks = []
-
-    # Tokenize the text into sentences
-    sentences = sent_tokenize(text)
+    sentences = sent_tokenize(text)  # Tokenize the text into sentences
     current_chunk = ""
     current_chunk_length = 0
 
+    # Iterate through sentences and split into chunks based on token limit
     for sentence in sentences:
         # Tokenize the sentence into words
         tokens = word_tokenize(sentence)
@@ -43,6 +46,9 @@ def break_large_text(text, max_token_limit):
 
 
 def generate_summary(text):
+    """
+    Generate a summary of a given text
+    """
     summ = [{"role": "system", "content": "You are an extractive document summarizer."}]
     summ.append(
         {
@@ -63,6 +69,9 @@ def generate_summary(text):
 
 
 def generate_question(text):
+    """
+    Generate questions based on a given text
+    """
     prompt = f"generate '10' multi-choice questions on this with 4 option including an answer and 3 distractors based on the following text:\n\n-----\n\n{text} \n\n note: do not perfom text completion, ignore references and the 10 questions should be in the format:\n\n 'question:\n options:\na\nb\nc\nd \nanswer:' "
     response = openai.Completion.create(
         model="text-davinci-003",
@@ -70,14 +79,15 @@ def generate_question(text):
         temperature=0.1,
         max_tokens=1500,
     )
-    print(response)
+    print(response.usage)
     question = response.choices[0].text
-    pjson = json.loads(str(response))
-    pdata = pjson["choices"][0]["text"]
-    return str(pdata)
+    return question
 
 
 def quest_parser(response):
+    """
+    Parse the response to extract questions, choices, and answers
+    """
     questions = []
     response_parts = response.strip().split(
         "\n\n"

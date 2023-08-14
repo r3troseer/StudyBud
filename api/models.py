@@ -1,4 +1,4 @@
-from django.db import models, transaction
+from django.db import models
 from document2text.models import Document
 from time import sleep
 from .utils import break_large_text, generate_summary, generate_question, quest_parser
@@ -8,12 +8,9 @@ quest_max_token_limit = 2000
 overlap = 50
 
 
-# Create your models here.
-class Quiz(models.Model):
-    name = models.CharField(max_length=200)
-
-
 class Question(models.Model):
+    """Model to store generated questions"""
+
     document = models.ForeignKey(Document, on_delete=models.CASCADE, null=True)
     question = models.CharField(max_length=255, null=True)
     options = models.JSONField(null=True)
@@ -21,15 +18,15 @@ class Question(models.Model):
 
     @classmethod
     def generate(cls, document_id):
+        """
+        Generate questions and store them in the database
+        """
         document = Document.objects.get(id=document_id)
         chunks = break_large_text(document.text, quest_max_token_limit)
         number_of_chunks = len(chunks)
-        # with transaction.atomic():
         for i, chunk in enumerate(chunks):
-            # print(f"chunk {i}: {chunk.strip()}")
-            quiz=[]
+            quiz = []
             quest = generate_question(chunk)
-            # print(f"question {i}: {quest}")
             questions = quest_parser(quest)
             print(questions)
             question_objs = []
@@ -42,7 +39,7 @@ class Question(models.Model):
                 )
                 question_objs.append(question_obj)
 
-            quiz= cls.objects.bulk_create(question_objs)
+            quiz = cls.objects.bulk_create(question_objs)
             if number_of_chunks > 2:
                 sleep(10)
         return quiz
@@ -52,6 +49,8 @@ class Question(models.Model):
 
 
 class Summary(models.Model):
+    """Model to store generated summary"""
+
     summarized_text = models.TextField()
     document = models.ForeignKey(Document, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
@@ -60,13 +59,14 @@ class Summary(models.Model):
         verbose_name_plural = "summaries"
 
     def generate(self):
+        """
+        Generate summaries by chunk and append to summarized_text
+        """
         chunks = break_large_text(self.document.text, summary_max_token_limit)
 
         for i, chunk in enumerate(chunks):
-            print(f"chunk {i}: {chunk.strip()}")
             summary = generate_summary(chunk)
-            print(f"summary {i}: {summary}")
-            self.summarized_text += summary + "\nend\n"
+            self.summarized_text += summary
             i += 1
         self.save()
 
