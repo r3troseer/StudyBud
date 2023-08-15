@@ -78,7 +78,7 @@ def generate_question(text):
         temperature=0.1,
         max_tokens=1500,
     )
-
+    print(response)
     question = response.choices[0].text
     return question
 
