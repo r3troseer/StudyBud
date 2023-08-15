@@ -64,7 +64,6 @@ def generate_summary(text):
 
     # Extract the generated summary from the API response
     summary = response.choices[0].message.content
-    print(response.usage)
     return summary
 
 
@@ -79,8 +78,7 @@ def generate_question(text):
         temperature=0.1,
         max_tokens=1500,
     )
-    print(response)
-    print(response.usage)
+
     question = response.choices[0].text
     return question
 
@@ -96,7 +94,7 @@ def generate_feedback(question, answer, wrong_answer):
         temperature=0.1,
         max_tokens=1500,
     )
-    print(response.usage)
+
     feedback = response.choices[0].text
     return feedback
 
@@ -112,9 +110,7 @@ def quest_parser(response):
 
     for qa in response_parts:
         lines = qa.split("\n")
-        print(f"all:\n {lines}")
 
-        print(f"first:\n {lines[0]}")
         try:
             question = lines[0].split(": ")[1]
         except IndexError:

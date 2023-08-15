@@ -1,4 +1,4 @@
-from rest_framework import generics, status, views, serializers
+from rest_framework import generics, status, views
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from document2text.models import Document
@@ -64,7 +64,6 @@ class SummaryView(generics.GenericAPIView):
     def get(self, request, pk):
         try:
             document = Document.objects.get(pk=pk)
-            print(document)
         except Document.DoesNotExist:
             return Response(
                 {"error": "Document not found."}, status=status.HTTP_404_NOT_FOUND

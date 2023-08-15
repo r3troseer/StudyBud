@@ -34,7 +34,6 @@ class Question(models.Model):
         for i, chunk in enumerate(chunks):
             quest = generate_question(chunk)
             questions = quest_parser(quest)
-            print(questions)
             question_objs = []
             for question, choices, answer in questions:
                 question_obj = cls(
@@ -49,7 +48,6 @@ class Question(models.Model):
             quiz.extend(quiz_obj)
             if number_of_chunks > 2:
                 sleep(10)
-        # print(quiz)
         return quiz
 
     def __str__(self):
@@ -102,7 +100,6 @@ class Feedback(models.Model):
             self.question.question, self.question.answer, self.wrong_answer
         )
         self.feedback_text = feedback
-        print(feedback)
         self.save()
 
     def __str__(self):
