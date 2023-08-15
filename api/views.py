@@ -1,11 +1,16 @@
-from rest_framework import generics, status, views
+from rest_framework import generics, status, views, serializers
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from document2text.models import Document
-from .serializers import FileSerializer, SummarySerializer, QuestionSerializer
+from .serializers import (
+    FileSerializer,
+    SummarySerializer,
+    QuestionSerializer,
+    FeedbackSerializer,
+)
 from .pagination import QuestionPagination
 from .tasks import generate_and_append_chunks
-from .models import Summary, Question
+from .models import Summary, Question, Feedback
 
 
 class FileView(generics.GenericAPIView):
@@ -123,3 +128,34 @@ class QuestionListView(generics.ListAPIView):
     def get_queryset(self):
         document_id = self.request.query_params.get("document_id")
         return Question.objects.filter(document_id=document_id)
+
+
+class FeedbackView(generics.CreateAPIView):
+    """
+    API endpoint to generate feedback.
+
+    - Retrieves the Question object based on the provided primary key.
+    - Generates a feeback for the document's text.
+    - Returns the feedback in the response.
+    """
+
+    queryset = Feedback.objects.all()
+    permission_classes = [AllowAny]
+    serializer_class = FeedbackSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        question = serializer.validated_data["question"]
+        wrong_answer = serializer.validated_data.get("wrong_answer", None)
+
+        feedback = Feedback(question=question)
+        feedback.generate(wrong_answer=wrong_answer)
+        feedback.save()
+
+        response_data = serializer.data
+        response_data["feedback_text"] = feedback.feedback_text
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(response_data, status=201, headers=headers)

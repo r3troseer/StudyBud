@@ -1,7 +1,13 @@
 from django.db import models
 from document2text.models import Document
 from time import sleep
-from .utils import break_large_text, generate_summary, generate_question, quest_parser
+from .utils import (
+    break_large_text,
+    generate_summary,
+    generate_question,
+    quest_parser,
+    generate_feedback,
+)
 
 summary_max_token_limit = 10000
 quest_max_token_limit = 2000
@@ -24,8 +30,8 @@ class Question(models.Model):
         document = Document.objects.get(id=document_id)
         chunks = break_large_text(document.text, quest_max_token_limit)
         number_of_chunks = len(chunks)
+        quiz = []
         for i, chunk in enumerate(chunks):
-            quiz = []
             quest = generate_question(chunk)
             questions = quest_parser(quest)
             print(questions)
@@ -39,9 +45,11 @@ class Question(models.Model):
                 )
                 question_objs.append(question_obj)
 
-            quiz = cls.objects.bulk_create(question_objs)
+            quiz_obj = cls.objects.bulk_create(question_objs)
+            quiz.extend(quiz_obj)
             if number_of_chunks > 2:
                 sleep(10)
+        # print(quiz)
         return quiz
 
     def __str__(self):
@@ -72,3 +80,30 @@ class Summary(models.Model):
 
     def __str__(self):
         return str(self.document)
+
+
+class Feedback(models.Model):
+    """Model to store generated Feedback"""
+
+    feedback_text = models.TextField()
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    wrong_answer = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+    class Meta:
+        verbose_name_plural = "feedbacks"
+
+    def generate(self, wrong_answer):
+        """
+        Generate feedback based on question and wrong answer
+        """
+        self.wrong_answer=wrong_answer
+        feedback = generate_feedback(
+            self.question.question, self.question.answer, self.wrong_answer
+        )
+        self.feedback_text = feedback
+        print(feedback)
+        self.save()
+
+    def __str__(self):
+        return f'{self.feedback_text} for {str(self.question)}'

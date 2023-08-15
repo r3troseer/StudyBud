@@ -72,16 +72,33 @@ def generate_question(text):
     """
     Generate questions based on a given text
     """
-    prompt = f"generate '10' multi-choice questions on this with 4 option including an answer and 3 distractors based on the following text:\n\n-----\n\n{text} \n\n note: do not perfom text completion, ignore references and the 10 questions should be in the format:\n\n 'question:\n options:\na\nb\nc\nd \nanswer:' "
+    prompt = f"generate '10' multi-choice questions on this with 4 option including an answer and 3 distractors based on the following text:\n\n-----\n\n{text} \n\n note: do not perfom text completion, ignore references and the 10 questions should be in the format:\n\n 'question:\n options:\na.\nb.\nc.\nd. \nanswer:' "
     response = openai.Completion.create(
         model="text-davinci-003",
         prompt=prompt,
         temperature=0.1,
         max_tokens=1500,
     )
+    print(response)
     print(response.usage)
     question = response.choices[0].text
     return question
+
+
+def generate_feedback(question, answer, wrong_answer):
+    if wrong_answer:
+        prompt = f"give short but detailed explanation why {answer} is the answer to {question} and not {wrong_answer}"
+    else:
+        prompt = f"give short but detailed explanation why {answer} is the answer to {question}"
+    response = openai.Completion.create(
+        model="text-davinci-002",
+        prompt=prompt,
+        temperature=0.1,
+        max_tokens=1500,
+    )
+    print(response.usage)
+    feedback = response.choices[0].text
+    return feedback
 
 
 def quest_parser(response):
