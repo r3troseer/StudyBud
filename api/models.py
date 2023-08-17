@@ -18,9 +18,9 @@ class Question(models.Model):
     """Model to store generated questions"""
 
     document = models.ForeignKey(Document, on_delete=models.CASCADE, null=True)
-    question = models.CharField(max_length=255, null=True)
+    question = models.CharField(max_length=512, null=True)
     options = models.JSONField(null=True)
-    answer = models.CharField(max_length=255, null=True)
+    answer = models.CharField(max_length=512, null=True)
 
     @classmethod
     def generate(cls, document_id):
