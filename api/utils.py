@@ -89,7 +89,7 @@ def generate_feedback(question, answer, wrong_answer):
     else:
         prompt = f"give short but detailed explanation why {answer} is the answer to {question}"
     response = openai.Completion.create(
-        model="text-davinci-002",
+        model="text-davinci-003",
         prompt=prompt,
         temperature=0.1,
         max_tokens=1500,
