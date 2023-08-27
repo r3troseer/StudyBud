@@ -76,7 +76,7 @@ def generate_question(text):
         model="text-davinci-003",
         prompt=prompt,
         temperature=0.1,
-        max_tokens=1500,
+        max_tokens=1400,
     )
     print(response)
     question = response.choices[0].text
