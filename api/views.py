@@ -83,6 +83,7 @@ class GenerateQuestionsView(generics.GenericAPIView):
     - Returns the questions in the response.
     """
 
+    queryset = Question.objects.all()
     permission_classes = [AllowAny]
     serializer_class = QuestionSerializer
 
@@ -94,7 +95,10 @@ class GenerateQuestionsView(generics.GenericAPIView):
                 {"error": "Document not found."}, status=status.HTTP_404_NOT_FOUND
             )
         questions = Question.generate(document.id)
+        print(f'here{questions}')
         serializer = self.get_serializer(questions, many=True)
+        print(f'there{serializer.data}')
+
         return Response(serializer.data)
 
 

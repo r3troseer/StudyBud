@@ -22,6 +22,7 @@ class QuestionSerializer(ModelSerializer):
     def get_correct_answer(self, obj):
         options = obj.options
         answer = obj.answer
+        print(f'answer: {answer}options: {options}')
         try:
             correct_index = options.index(answer)
         except ValueError:

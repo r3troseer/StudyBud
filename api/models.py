@@ -35,14 +35,27 @@ class Question(models.Model):
             quest = generate_question(chunk)
             questions = quest_parser(quest)
             question_objs = []
-            for question, choices, answer in questions:
-                question_obj = cls(
-                    document=document,
-                    question=question,
-                    options=choices,
-                    answer=answer,
-                )
-                question_objs.append(question_obj)
+
+            if 'questions' in questions:
+                print(f'questions{questions["questions"]}\n\n\n')
+                for j in questions['questions']:
+                    print(j['question'], j['choices'], j['answer'])
+                    question_obj = cls(
+                        document=document,
+                        question=j['question'],
+                        options=j['choices'],
+                        answer=j['answer'],
+                    )
+                    question_objs.append(question_obj)
+            else:
+                for j in questions:
+                    question_obj = cls(
+                        document=document,
+                        question=j['question'],
+                        options=j['choices'],
+                        answer=j['answer'],
+                    )
+                    question_objs.append(question_obj)
 
             quiz_obj = cls.objects.bulk_create(question_objs)
             quiz.extend(quiz_obj)
