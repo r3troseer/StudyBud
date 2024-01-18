@@ -71,15 +71,23 @@ def generate_question(text):
     """
     Generate questions based on a given text
     """
-    prompt = f"generate '10' multi-choice questions on this with 4 option including an answer and 3 distractors based on the following text:\n\n-----\n\n{text} \n\n note: do not perfom text completion, ignore references and the 10 questions should be in the format:\n\n 'question:\n options:\na.\nb.\nc.\nd. \nanswer:' "
-    response = openai.Completion.create(
-        model="text-davinci-003",
-        prompt=prompt,
+    prompt = [{"role": "system", "content": "You are an extractive document summarizer."}]
+    prompt.append(
+        {
+            "role": "user",
+            "content": f"generate '10' multi-choice questions on this with 4 option including an answer and 3 distractors based on the following text:\n\n-----\n\n{text} \n\n note: do not perfom text completion, ignore references and the 10 questions should be in json format (question, choice and correct answer)' ",
+        }
+    ) 
+    
+   
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=prompt,
         temperature=0.1,
         max_tokens=1200,
     )
     print(response)
-    question = response.choices[0].text
+    question = response.choices[0].message.content
     return question
 
 
@@ -89,7 +97,7 @@ def generate_feedback(question, answer, wrong_answer):
     else:
         prompt = f"give short but detailed explanation why {answer} is the answer to {question}"
     response = openai.Completion.create(
-        model="text-davinci-003",
+        model="gpt-3.5-turbo",
         prompt=prompt,
         temperature=0.1,
         max_tokens=1500,
@@ -103,31 +111,6 @@ def quest_parser(response):
     """
     Parse the response to extract questions, choices, and answers
     """
-    questions = []
-    response_parts = response.strip().split(
-        "\n\n"
-    )  # Split response into individual questions
-
-    for qa in response_parts:
-        lines = qa.split("\n")
-
-        try:
-            question = lines[0].split(": ")[1]
-        except IndexError:
-            question = lines[0].split(". ")[1]
-
-        choices = []
-        for line in lines[1:-1]:
-            if line.startswith("   Options") or line.startswith("Options"):
-                continue  # skip lines starting with 'Options'
-
-            choices.append(line)
-
-        answer = lines[-1].split(": ")[1]
-
-        answer = qa.split("\n")[-1].split(": ")[1]
-        questions.append(
-            (question, choices, answer)
-        )  # Append the parsed question to the list
+    questions = json.loads(response)
 
     return questions
